@@ -1,2 +1,4 @@
 # Microcontrolador
-Repositoria da disciplina de microcontroladores
+Repositório da disciplina de microcontroladores
+
+Aluno: Vinícius Ferreira Ribeiro
