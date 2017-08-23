@@ -50,4 +50,34 @@ loop :  mov.w R12, R7
 	jmp loop
 ret:  	ret
 
+#Resposta 4
+Pergunta: "Traduza" o seguinte trecho de código em C para o assembly do MSP430:
+for(i=0; i<100; i++) A[i] = i*2;
 
+	mov.w #100, R14 ; j= 100
+loop:   mov.w R7,R12 ; adc i ao R12
+	rla.w R12 ; R12 = A[i]
+	mov.w R12,R13
+	add.w R9, R12 ; R12 = &A + i*2
+	mov.w R13, 0(R12); A[i]{0R12} =i*2
+	cmp R7, R14
+	jge exit ; if(i>=100)
+	icc.w R7
+	jmp loop
+exit: 	ret
+
+#Resposta 5
+Pergunta: "Traduza" o seguinte trecho de código em C para o assembly do MSP430:
+for(i=99; i>=0; i--) A[i] = i*2;
+
+mov.w #99, R14
+loop: 	mov.w R7,R12
+	rla.w R12
+	mov.w R12,R13
+	add.w R9,R12
+	mov.w R13, O(R12);
+	cmp R7,R14
+	jeq exit ; if(i==0)
+	dec.ww R7
+	jmp loop
+exit: 	ret
