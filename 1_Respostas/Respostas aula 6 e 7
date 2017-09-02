@@ -167,4 +167,155 @@ E_Primo:
           mov.w #1,R15
 Falso:
           ret
-         
+
+#Resposta 6
+Pergunta: Escreva uma função em C que calcula o duplo fatorial de n, representado por n!!. Se n for ímpar, n!! = 135*...n, e se n for par, n!! = 246...n. Por exemplo, 9!! = 13579 = 945 e 10!! = 2468*10 = 3840. Além disso, 0!! = 1!! = 1. O protótipo da função é:
+
+unsigned long long DuploFatorial(unsigned long long n);
+
+{
+		if(n < 2) return 1;
+		unsigned long long retn = 1;
+		for(unsigned long long i = n; i >= 2; i=i-2)
+			retn *= i;
+		return retn;
+	}
+#Resposta 7
+Pergunta: (a) Escreva uma função em C que calcula a função exponencial utilizando a série de Taylor da mesma. Considere o cálculo até o termo n = 20. O protótipo da função é:
+
+double ExpTaylor(double x);
+
+unsigned long Fatorial(unsigned long N)
+
+	{
+		if (N < 2) return 1;
+		unsigned long Fat = 1;
+		for(int i = 2; i <= N;i++)
+			Fat *= i;
+		return Fat;
+	}
+
+	double power(double x, int N)
+	{
+		double retn = 1;
+		if (N == 0) return retn;
+
+		for(int i = 0; i < N;i++)
+			retn *= x;
+
+		return retn;
+	}
+
+	double ExpTaylor(double x)
+	{
+		double v = 1;
+		for(int i = 1; i <= 20; i++)
+			v += power(x, i) / Fatorial(i);
+		return v;
+	}
+
+(b) Escreva a sub-rotina equivalente na linguagem Assembly do MSP430, mas considere que os valores de entrada e de saída são inteiros de 16 bits. A variável de entrada é fornecida pelo registrador R15, e o valor de saída também.
+
+Fat:
+			cmp #2,R15
+			jl Fat_2		
+			mov.w R15, R13		;	R13 = N
+			mov.w #2, R14	;	
+Fat_1:			cmp R14, R13		;	N >= i 
+			jge Final
+			push R13		
+			call #Mult_unsigned	;	Multiplicação R15*=R14 -> Fat*=i
+			pop R13
+			inc.w R14
+			jmp Fat_1
+Fat_2:			mov.w #1, R15
+Final:			ret
+
+#Resposta 8
+Pergunta: screva uma sub-rotina na linguagem Assembly do MSP430 que indica se um vetor esta ordenado de forma decrescente. Por exemplo: [5 4 3 2 1] e [90 23 20 10] estão ordenados de forma decrescente. [1 2 3 4 5] e [1 2 3 2] não estão. O primeiro endereço do vetor é fornecido pelo registrador R15, e o tamanho do vetor é fornecido pelo registrador R14. A saída deverá ser fornecida no registrador R15, valendo 1 quando o vetor estiver ordenado de forma decrescente, e valendo 0 em caso contrário.
+
+Dec:
+		mov.w #0, R13		
+		mov.w R15, R12		
+		dec.w R14		
+                push R4
+Dec_1:		cmp R14, R13		; i < N
+		jeq Dec_2		; Fim se i == N
+                mov.w R13, R4		
+                rla R4              	
+		add.w R4, R12		
+		cmp 0(R12),2(R12)	
+		jge N_dec
+		inc.w R13
+		jmp Dec_1
+Dec_2:		mov.w #1, R15		; É decrescente
+                pop R4
+                ret
+N_dec:		mov.w #0, R15		; Não é decrescente
+                pop R4
+                ret
+
+#Resposta 9
+Pergunta: Escreva uma sub-rotina na linguagem Assembly do MSP430 que calcula o produto escalar de dois vetores, a e b. O primeiro endereço do vetor a deverá ser passado através do registrador R15, o primeiro endereço do vetor b deverá ser passado através do registrador R14, e o tamanho do vetor deverá ser passado pelo registrador R13. A saída deverá ser fornecida no registrador R15.
+
+Prod_escalar:
+		push R4
+		push R5
+		push R6
+		push R7				; R7 = Produto escalar
+		push R11			; tempA = deve receber &a + 2*i 
+		push R10			; tempB = deve receber &b + 2*i
+		mov.w R15, R5		; R5 = &a
+		mov.w R14, R4		; R4 = &b
+		mov.w R13, R6		; R6 = n (Total de elementos)
+		mov.w #0, R12		; i = 0
+		clr R7				; Prod_escalar = 0 - Começa com 0
+Prod_for:	cmp R6, R12			; cmp n, i-2
+		jeq FimProdFor
+		push R12
+		mov.w R12, R11		; tempA = i
+		mov.w R12, R10		; tempB = i-2
+		rla R11				; tempA = 2*i
+		rla R10				; tempB = 2*i
+		add.w R5, R11		; tempA = &a + 2*i
+		add.w R4, R10		; tempB = &b + 2*i
+		mov.w 0(R11), R15	; R15 = a[i]
+		mov.w 0(R10), R14	; R14 = b[i]
+		call #Mult_unsigned	; a[i] = a[i]*b[i]
+		add.w R15, R7		; Prod_escalar += a[i]*b[i]
+                pop R12
+		inc.w R12			; i++
+		jmp Prod_for
+FimProdFor:	mov.w R7, R15
+		pop R10
+		pop R11
+		pop R7
+		pop R6
+		pop R5
+		pop R4
+		ret
+#Resposta 10
+Pergunta: (a) Escreva uma função em C que indica se um vetor é palíndromo. Por exemplo: [1 2 3 2 1] e [0 10 20 20 10 0] são palíndromos. [5 4 3 2 1] e [1 2 3 2] não são. Se o vetor for palíndromo, retorne o valor 1. Caso contrário, retorne o valor 0. O protótipo da função é:
+
+int Palindromo(int vetor[ ], int tamanho);
+
+for (int i = 0; i < tamanho >> 1; i++)
+	if (vetor[i] != vetor[tamanho - i - 1]) 
+		return 0;
+return 1;
+
+(b) Escreva a sub-rotina equivalente na linguagem Assembly do MSP430. O endereço do vetor de entrada é dado pelo registrador R15, o tamanho do vetor é dado pelo registrador R14, e o resultado é dado pelo registrador R15.
+
+int: clr.w  R15
+     clr.w  R14
+     mov.w #0(R15), R16
+     mov.w #0(R14), R13	
+
+loop: cmp #FFFFFh,R13
+      jz palin
+      mov.w R16,R13
+      inc.w R13
+      inc.w R16
+      push R16
+      jmp loop	
+palin: cmp #0,	
