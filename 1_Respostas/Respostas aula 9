@@ -1,0 +1,93 @@
+#Resposta 1
+Pergunta: Escreva uma função em C que faz o debounce de botões ligados à porta P1.
+
+int Deboucing(int porta)
+{
+  /*A função recebe qual porta deve realizar o deboucing e retorna o valor lido da porta P1.X 
+  onde X refere-se a porta escolhida*/
+  
+  x = P1IN;
+  x &= porta;
+  for(i=0;i<5000;i++)
+  {
+    if((P1IN&porta) != x))
+      {
+        i = 0;        //Houve variação na entrada, deve-se reiniciar a contagem;
+      }
+  }
+  return x;
+}
+int main( void )
+{
+  WDTCTL = WDTPW + WDTHOLD;
+
+  return 0;
+}
+
+#Resposta 2
+Pergunta: Escreva um código em C que lê 9 botões multiplexados por 6 pinos, e pisca os LEDs da placa Launchpad de acordo com os botões. Por exemplo, se o primeiro botão é pressionado, os LEDs piscam uma vez; se o segundo botão é pressionado, os LEDs piscam duas vezes; e assim por diante. Se mais de um botão é pressionado, os LEDs não piscam.
+
+#include <msp430g2533.h>
+#include <legacymsp430.h>
+
+
+#define SetOut(pin)		 (P1DIR |= pin)
+#define SetIn(pin)		 (P1DIR &= ~pin)
+#define SetPullUp(pin)	 (P1REN |= pin)
+#define SetPullDown(pin) (P1REN &= ~pin)
+#define SetHigh(pin)	 (P1OUT |= pin)
+#define SetLow(pin)		 (P1OUT &= ~pin)
+#define SwitchValue(pin) (P1OUT ^= pin)
+
+byte X[] = { BIT0, BIT1, BIT2 }; // Coluna
+byte Y[] = { BIT3, BIT4, BIT5 }; // Linha
+
+void SetupX(byte dir)
+{
+	int i;
+	for (i = 0; i < 3; i++)
+	{
+		if (dir)
+		{
+			SetOut(X[i]);
+			SetPullDown(X[i]);
+			SetLow(X[i]);
+		}
+		else
+		{
+			SetIn(X[i]);
+			SetPullUp(X[i]);
+			
+		}
+	}
+}
+
+// dir = 0, entrada.
+// dir = 1, saída.
+void SetupY(byte dir)
+{
+	int i;
+	for (i = 0; i < 3; i++)
+	{
+		if (dir)
+		{
+			SetOut(Y[i]);
+			SetPullDown(Y[i]);
+			SetLow(Y[i]);
+		}
+		else
+		{
+			SetIn(Y[i]);
+			SetPullUp(Y[i]);
+		}
+	}
+}
+
+
+
+int main()
+{
+	WDTCTL = WDTPW | WDTHOLD;
+
+	return 0;
+}
